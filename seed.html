@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ใส่ข้อมูลตัวอย่างลง Firestore · LeaveEasy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/nav.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script type="module" src="js/seed.js"></script>
+</head>
+<body>
+  <div id="nav"></div>
+
+  <div class="container">
+    <h1>ใส่ข้อมูลตัวอย่างลง Firestore</h1>
+    <p class="subtitle">หน้าเครื่องมือสำหรับสัปดาห์ที่ 6 · ไม่ใช่หน้าที่ผู้ใช้ทั่วไปจะเห็น</p>
+
+    <div class="alert alert-warn">
+      <strong>ก่อนกดปุ่ม</strong> ต้องสร้าง Firestore Database ใน Firebase Console ให้เสร็จก่อน
+      (เมนู Firestore Database → Create database → เลือก <code>asia-southeast1</code> → Start in test mode)
+    </div>
+
+    <div class="card">
+      <h2>ข้อมูลที่จะส่งขึ้นไป</h2>
+      <div id="สรุปข้อมูล"></div>
+      <p class="hint">
+        ข้อมูลทั้งหมดอ่านมาจาก <code>js/data.js</code> ไม่ได้พิมพ์ซ้ำ
+        · ชื่อไฟล์กำหนดเองเป็น <code>u001</code> <code>lt001</code> <code>lr001</code> ตามข้อกำหนด
+        · <strong>กดซ้ำได้ ข้อมูลไม่ซ้ำ</strong> เพราะเขียนทับไฟล์เดิม
+      </p>
+      <div class="btn-row">
+        <button type="button" id="ปุ่มใส่ข้อมูล">ใส่ข้อมูลตัวอย่างลง Firestore</button>
+        <button type="button" id="ปุ่มตรวจสอบ" class="btn-ghost">ตรวจสอบว่ามีอะไรอยู่บน Firestore แล้วบ้าง</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>ผลการทำงาน</h2>
+      <div id="ผลลัพธ์"><p class="hint">ยังไม่ได้เริ่ม — กดปุ่มด้านบน</p></div>
+    </div>
+  </div>
+</body>
+</html>
