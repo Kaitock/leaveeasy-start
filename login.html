@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ · LeaveEasy</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container login-box">
+    <h1>🔧 LeaveEasy</h1>
+    <p class="subtitle" id="คำอธิบายโหมด">เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน</p>
+
+    <div class="card">
+      <div id="ข้อความเตือน" class="alert alert-error hidden"></div>
+      <div id="ข้อความสำเร็จ" class="alert alert-ok hidden"></div>
+
+      <form id="ฟอร์มล็อกอิน">
+        <label for="ชื่อผู้ใช้" id="ป้ายชื่อ" class="hidden">ชื่อ-นามสกุล</label>
+        <input type="text" id="ชื่อผู้ใช้" placeholder="เช่น สมชาย ใจดี" class="hidden">
+
+        <label for="อีเมล">อีเมล</label>
+        <input type="email" id="อีเมล" placeholder="you@example.com">
+
+        <label for="รหัสผ่าน">รหัสผ่าน</label>
+        <input type="password" id="รหัสผ่าน" placeholder="อย่างน้อย 6 ตัวอักษร">
+
+        <div class="btn-row">
+          <button type="submit" id="ปุ่มส่ง">เข้าสู่ระบบ</button>
+        </div>
+      </form>
+
+      <p class="hint"><a href="#" id="ลิงก์สลับโหมด">ยังไม่มีบัญชี? สมัครสมาชิก</a></p>
+      <p class="hint"><a href="#" id="ลิงก์ลืมรหัสผ่าน">ลืมรหัสผ่าน?</a></p>
+    </div>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

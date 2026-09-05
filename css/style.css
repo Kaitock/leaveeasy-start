@@ -40,6 +40,7 @@ body {
 
 /* ── กรอบเนื้อหา ── */
 .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+.login-box { max-width: 420px; }
 h1 { font-size: 28px; margin: 18px 0 6px; }
 h2 { font-size: 22px; margin: 26px 0 8px; }
 .subtitle { color: var(--สีจาง); margin-top: 0; }
@@ -91,6 +92,7 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .btn-danger:hover { background: #8c1c16; }
 .btn-ok { background: #1b7f45; border-color: #1b7f45; }
 .btn-ok:hover { background: #146134; }
+.btn-small { font-size: 14px; padding: 5px 12px; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 
 /* ── ฟอร์ม ── */

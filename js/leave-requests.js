@@ -8,7 +8,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import { db } from "./firebase.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import {
+  collection,
+  getDocs,
+  doc,
+  deleteDoc,
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 var กล่อง = document.getElementById("ผลลัพธ์");
 
@@ -24,11 +29,6 @@ async function เริ่มทำงาน() {
     แสดงข้อผิดพลาด(ข้อผิดพลาด);
     return;
   }
-
-  // ใบที่เพิ่งยื่นจากหน้าฟอร์ม ยังเก็บชั่วคราวในเบราว์เซอร์อยู่
-  // (สัปดาห์ที่ 7 ฟอร์มจะเขียนลง Firestore ได้จริง แล้วบรรทัดนี้จะถูกตัดทิ้ง)
-  var ใบลาที่ยื่นใหม่ = JSON.parse(sessionStorage.getItem("ใบลาที่ยื่นใหม่") || "[]");
-  ใบลาทั้งหมด = ใบลาทั้งหมด.concat(ใบลาที่ยื่นใหม่);
 
   // ถ้ามีสถานะติดมาท้าย URL ให้กรองเฉพาะสถานะนั้น
   var สถานะที่กรอง = ค่าจากURL("status");
@@ -92,6 +92,7 @@ function แสดงตาราง(รายการ) {
     "<th>สถานะ</th>" +
     '<th class="hide-mobile">ผู้ขอลา</th>' +
     '<th class="hide-mobile">วันที่ลา</th>' +
+    "<th></th>" +
     "</tr></thead><tbody>";
 
   รายการ.forEach(function (ใบ) {
@@ -102,6 +103,8 @@ function แสดงตาราง(รายการ) {
       "<td>" + ป้ายสถานะ(ใบ.status) + "</td>" +
       '<td class="hide-mobile">' + esc(ใบ.requesterName) + "</td>" +
       '<td class="hide-mobile">' + esc(ใบ.startDate) + " ถึง " + esc(ใบ.endDate) + "</td>" +
+      "<td><button type=\"button\" class=\"btn-danger btn-small ปุ่มลบ\" data-id=\"" + esc(ใบ.id) +
+      "\" data-title=\"" + esc(ใบ.title) + "\">ลบ</button></td>" +
       "</tr>";
   });
 
@@ -114,4 +117,39 @@ function แสดงตาราง(รายการ) {
       location.href = "leave-request-detail.html?id=" + แถว.dataset.id;
     });
   });
+
+  // กดปุ่มลบ — ต้องกันไม่ให้คลิกทะลุไปโดน handler ของทั้งแถวด้านบน
+  // ไม่งั้นจะกลายเป็นกดลบแล้วเด้งไปหน้ารายละเอียดแทน
+  กล่อง.querySelectorAll(".ปุ่มลบ").forEach(function (ปุ่ม) {
+    ปุ่ม.addEventListener("click", function (e) {
+      e.stopPropagation();
+      ลบใบลา(ปุ่ม);
+    });
+  });
+}
+
+// ── ลบใบลา 1 ใบ พร้อมถามยืนยันก่อนทุกครั้ง ────────────────────
+async function ลบใบลา(ปุ่ม) {
+  var รหัส = ปุ่ม.dataset.id;
+  var หัวข้อ = ปุ่ม.dataset.title;
+
+  var ยืนยัน = confirm('ยืนยันลบใบลา "' + หัวข้อ + '" ใช่หรือไม่?\nลบแล้วกู้คืนไม่ได้');
+  if (!ยืนยัน) return; // กดยกเลิก — ไม่ลบอะไร ข้อมูลอยู่ครบเหมือนเดิม
+
+  ปุ่ม.disabled = true;
+  ปุ่ม.textContent = "กำลังลบ …";
+
+  try {
+    await deleteDoc(doc(db, "leaveRequests", รหัส));
+  } catch (ข้อผิดพลาด) {
+    // ลบไม่สำเร็จ — เปิดปุ่มคืน แถวยังอยู่เหมือนเดิม
+    ปุ่ม.disabled = false;
+    ปุ่ม.textContent = "ลบ";
+    alert("ลบใบลาไม่สำเร็จ — " + ข้อผิดพลาด.message);
+    return;
+  }
+
+  // ลบสำเร็จ — เอาแถวนี้ออกจากหน้าเว็บทันที ไม่ต้องโหลดหน้าใหม่ทั้งหน้า
+  var แถว = ปุ่ม.closest("tr");
+  if (แถว) แถว.remove();
 }

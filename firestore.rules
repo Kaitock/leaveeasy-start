@@ -1,0 +1,32 @@
+// ─────────────────────────────────────────────────────────────
+// firestore.rules — กฎความปลอดภัยขั้นต่ำของ LeaveEasy (สัปดาห์ที่ 7)
+//
+// กฎเดียวของไฟล์นี้: "ต้องล็อกอินก่อน ถึงจะอ่านหรือเขียนอะไรก็ได้"
+// ครอบคลุมทุกโฟลเดอร์ในฐานข้อมูลนี้ รวมโฟลเดอร์ย่อยทุกชั้น
+// (users, leaveTypes, leaveRequests, leaveRequests/{id}/approvals ฯลฯ)
+//
+// 📌 กฎนี้ "ไม่" เช็กว่า:
+//    - คนอ่าน/เขียนเป็นเจ้าของเอกสารนั้นหรือไม่ (เช่น employee เปิดใบลาคนอื่นได้)
+//    - คนเขียนมี role ตรงกับที่ ACL.md กำหนดไว้หรือไม่ (เช่น employee ก็ยัง
+//      อนุมัติใบลา หรือลบใบลาของคนอื่นได้ผ่าน Firestore ตรง ๆ)
+//    - ช่องไหนแก้ได้/แก้ไม่ได้ (เช่น manager แก้ได้แค่ status แต่กฎนี้ไม่บังคับ)
+//    กฎรายห้องตามเช็กลิสต์และ ACL.md เต็มรูปแบบเป็นงานของสัปดาห์ที่ 8
+//
+// วิธี deploy (ทำเองตอนพร้อม ไม่ได้ทำในไฟล์นี้):
+//   1) Firebase Console → โครงการ leaveeasy-jirapan → Firestore Database
+//      → แท็บ Rules → วางเนื้อหาไฟล์นี้ทับของเดิม → Publish
+//   หรือ
+//   2) ถ้าตั้ง Firebase CLI ไว้แล้ว: firebase deploy --only firestore:rules
+// ─────────────────────────────────────────────────────────────
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ทุกเอกสารทุกโฟลเดอร์ ทุกชั้นความลึก (รวม subcollection เช่น approvals)
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
