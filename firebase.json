@@ -19,7 +19,24 @@
       "README.md",
       "CLAUDE.md",
       "ACL.md",
-      "leaveeasy-spec.md"
+      "leaveeasy-spec.md",
+
+      "js/config.local.js",
+      "js/config.local.json",
+      "js/secrets.js",
+      "js/secrets.json",
+      "*serviceAccount*.json",
+      "firebase-adminsdk*.json",
+      "*.pem",
+      "*.key",
+      "*.p12",
+      "*.p8",
+      "credentials.json",
+
+      "playwright.config.js",
+      "tests/**",
+      "test-results/**",
+      "playwright-report/**"
     ]
   }
 }

@@ -15,7 +15,12 @@
 // ใช้ URL เต็มเพราะโครงงานนี้ไม่มีขั้นตอน build มาแปลงชื่อย่อให้
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  inMemoryPersistence,
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 // ค่าตั้งต้นของโครงการ — คัดลอกมาจากหน้า Project settings ใน Firebase Console
 const firebaseConfig = {
@@ -34,7 +39,13 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ระบบล็อกอิน — สัปดาห์ที่ 7 เพิ่มเข้ามา ใช้คู่กับ js/auth.js และ js/login.js
-const auth = getAuth(app);
+// 📌 ตั้ง persistence แบบมีลำดับสำรอง (fallback) กันปัญหา "ล็อกอินสำเร็จ แต่พอเปลี่ยนหน้า
+//    กลับเหมือนไม่ได้ล็อกอิน แล้วเด้งวนไปมาระหว่าง login.html กับหน้าอื่น" —
+//    ถ้า IndexedDB ใช้ไม่ได้ (บางเบราว์เซอร์/บาง privacy setting บล็อกไว้)
+//    ให้ร่วงไปใช้ localStorage แทน แล้วค่อยร่วงไปความจำชั่วคราวเป็นทางเลือกสุดท้าย
+const auth = initializeAuth(app, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence],
+});
 
 // ส่งออกให้ไฟล์อื่นที่เป็น module นำไปใช้ได้
 export { app, db, auth };

@@ -12,12 +12,17 @@
 
 import { db } from "./firebase.js";
 import { collection, addDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { เรียกAI } from "./ai.js";
 
 var ฟอร์ม = document.getElementById("ฟอร์มใบลา");
 var ช่องประเภท = document.getElementById("leaveTypeId");
 var กล่องเตือน = document.getElementById("ข้อความเตือน");
 var ปุ่มบันทึก = ฟอร์ม.querySelector('button[type="submit"]');
 var กำลังบันทึก = false;
+
+var ปุ่มAI = document.getElementById("ปุ่มAI");
+var กล่องข้อความAI = document.getElementById("ข้อความAI");
+var ข้อความปุ่มAIปกติ = ปุ่มAI.textContent;
 
 // เติมรายการเลื่อนลงด้วยประเภทการลาที่มีอยู่
 window.LEAVE_DATA.leaveTypes.forEach(function (ประเภท) {
@@ -26,6 +31,64 @@ window.LEAVE_DATA.leaveTypes.forEach(function (ประเภท) {
   ตัวเลือก.textContent = ประเภท.name;
   ช่องประเภท.appendChild(ตัวเลือก);
 });
+
+// ── ปุ่ม "ให้ AI ช่วยจัดประเภทการลา" (US-09) ─────────────────
+// อ่านช่องเหตุผล ส่งไปพร้อมรายชื่อประเภทการลาที่มีอยู่จริง แล้วให้ AI เลือกประเภทให้
+// ผลที่ได้ต้องเป็นประเภทที่มีอยู่จริงในระบบเท่านั้น ไม่งั้นถือว่าจัดให้ไม่ได้ และไม่แตะค่าเดิม
+ปุ่มAI.addEventListener("click", async function () {
+  var เหตุผล = document.getElementById("reason").value.trim();
+
+  ซ่อนเตือน();
+  ซ่อนข้อความAI();
+
+  if (!เหตุผล) {
+    เตือน("พิมพ์เหตุผลการลาก่อน ถึงจะให้ AI ช่วยจัดประเภทได้");
+    return;
+  }
+
+  ปุ่มAI.disabled = true;
+  ปุ่มAI.textContent = "🤖 กำลังให้ AI ช่วยจัด …";
+
+  try {
+    var รายการประเภท = window.LEAVE_DATA.leaveTypes
+      .map(function (t) { return t.id + ": " + t.name; })
+      .join("\n");
+
+    var promptถามAI =
+      "คุณคือระบบช่วยจัดประเภทการลา ต่อไปนี้คือประเภทการลาที่มีอยู่จริงในระบบเท่านั้น (ต้องเลือกจากนี้เท่านั้น):\n" +
+      รายการประเภท +
+      "\n\nเหตุผลการลาของพนักงาน: \"" + เหตุผล + "\"\n\n" +
+      "ตอบกลับด้วยรหัสประเภท (เช่น " + window.LEAVE_DATA.leaveTypes[0].id + ") เพียงอย่างเดียว " +
+      "ห้ามมีคำอธิบายหรือข้อความอื่นใด ถ้าไม่แน่ใจหรือไม่เข้ากับประเภทใดเลย ให้ตอบคำว่า ไม่แน่ใจ";
+
+    var คำตอบ = await เรียกAI(promptถามAI);
+    var ประเภทที่ตรง = window.LEAVE_DATA.leaveTypes.find(function (t) {
+      return คำตอบ.indexOf(t.id) !== -1;
+    });
+
+    if (!ประเภทที่ตรง) {
+      เตือน("AI จัดประเภทให้ไม่ได้ — ลองพิมพ์เหตุผลให้ชัดขึ้น หรือเลือกประเภทเองได้เลย");
+      return;
+    }
+
+    ช่องประเภท.value = ประเภทที่ตรง.id;
+    แสดงข้อความAI("🤖 ข้อเสนอจาก AI — โปรดตรวจสอบก่อนยืนยัน: เลือกเป็น “" + ประเภทที่ตรง.name + "”");
+  } catch (ข้อผิดพลาด) {
+    เตือน("เรียก AI ไม่สำเร็จ — " + ข้อผิดพลาด.message + " · เลือกประเภทเองได้ตามปกติ");
+  } finally {
+    ปุ่มAI.disabled = false;
+    ปุ่มAI.textContent = ข้อความปุ่มAIปกติ;
+  }
+});
+
+function แสดงข้อความAI(ข้อความ) {
+  กล่องข้อความAI.textContent = ข้อความ;
+  กล่องข้อความAI.classList.remove("hidden");
+}
+
+function ซ่อนข้อความAI() {
+  กล่องข้อความAI.classList.add("hidden");
+}
 
 ฟอร์ม.addEventListener("submit", async function (e) {
   e.preventDefault();

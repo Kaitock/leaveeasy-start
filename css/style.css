@@ -1,70 +1,102 @@
 /* ─────────────────────────────────────────────────────────────
    css/style.css — หน้าตาที่ใช้ร่วมกันทุกหน้าของ LeaveEasy
    แก้ที่ไฟล์นี้ที่เดียว ทุกหน้าเปลี่ยนตามพร้อมกัน
+
+   📌 ปรับหน้าตาใหม่ (สัปดาห์นี้) — ชื่อคลาส/id ทุกตัวเหมือนเดิมทุกตัวอักษร
+      แก้แค่ค่าดีไซน์ (สี ระยะห่าง เงา ตัวอักษร) ไม่แตะโครงสร้าง จึงไม่กระทบ
+      โค้ด JS ที่ต่อ id พวกนี้ไว้เลย
    ───────────────────────────────────────────────────────────── */
 
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
 :root {
-  --สีหลัก: #1f5f8b;
+  /* โทนหลัก — indigo/blue เดิม ปรับให้เข้มขึ้นเล็กน้อยเพื่อ contrast ที่ดีขึ้น */
+  --สีหลัก: #205e8c;
   --สีหลักเข้ม: #14405f;
-  --สีพื้น: #f4f6f8;
-  --สีขอบ: #d8dee4;
-  --สีตัวอักษร: #22282e;
-  --สีจาง: #667380;
+  --สีหลักอ่อน: #eaf3fb;
+  --สีพื้น: #f3f5f8;
+  --สีพื้นผิว: #ffffff;
+  --สีขอบ: #dde3ea;
+  --สีตัวอักษร: #1c2126;
+  --สีจาง: #5b6672;
+
+  /* โทเคนใหม่ — ใช้ร่วมกันให้ทุกองค์ประกอบมีจังหวะเดียวกัน */
+  --รัศมี: 10px;
+  --รัศมีเล็ก: 8px;
+  --เงา: 0 1px 2px rgba(20, 40, 60, .06), 0 4px 14px rgba(20, 40, 60, .06);
+  --เงาโฮเวอร์: 0 2px 4px rgba(20, 40, 60, .08), 0 10px 24px rgba(20, 40, 60, .10);
+  --เปลี่ยนผ่าน: 150ms ease;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: "Leelawadee UI", "Sarabun", "Segoe UI", "Noto Sans Thai", sans-serif;
-  font-size: 17px;
+  font-family: "Noto Sans Thai", "Inter", "Leelawadee UI", "Segoe UI", sans-serif;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--สีตัวอักษร);
   background: var(--สีพื้น);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--สีหลัก); }
+a:hover { color: var(--สีหลักเข้ม); }
+
+/* โฟกัสให้เห็นชัดทุกองค์ประกอบที่กดได้ — จำเป็นสำหรับคนใช้คีย์บอร์ด/สายตาไม่ปกติ */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid #8fc2ec;
+  outline-offset: 2px;
 }
 
 /* ── แถบเมนูด้านบน ── */
 .navbar {
-  background: var(--สีหลัก);
+  background: linear-gradient(180deg, var(--สีหลัก), var(--สีหลักเข้ม));
   color: #fff;
-  padding: 10px 16px;
+  padding: 12px 18px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 18px;
+  gap: 6px 20px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .08);
 }
-.navbar .brand { font-weight: 700; font-size: 20px; margin-right: 10px; }
-.navbar a { color: #fff; text-decoration: none; padding: 4px 2px; }
-.navbar a:hover, .navbar a.active { border-bottom: 3px solid #ffd166; }
+.navbar .brand { font-weight: 700; font-size: 20px; margin-right: 10px; letter-spacing: .2px; }
+.navbar a { color: rgba(255, 255, 255, .92); text-decoration: none; padding: 6px 2px; border-bottom: 3px solid transparent; transition: var(--เปลี่ยนผ่าน); }
+.navbar a:hover { color: #fff; }
+.navbar a:hover, .navbar a.active { border-bottom-color: #ffd166; }
 .navbar .nav-user { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; }
 
 /* ── กรอบเนื้อหา ── */
-.container { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+.container { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
 .login-box { max-width: 420px; }
-h1 { font-size: 28px; margin: 18px 0 6px; }
-h2 { font-size: 22px; margin: 26px 0 8px; }
+h1 { font-size: 28px; font-weight: 700; margin: 20px 0 6px; letter-spacing: -.2px; }
+h2 { font-size: 21px; font-weight: 700; margin: 28px 0 10px; }
 .subtitle { color: var(--สีจาง); margin-top: 0; }
 
 .card {
-  background: #fff;
+  background: var(--สีพื้นผิว);
   border: 1px solid var(--สีขอบ);
-  border-radius: 10px;
-  padding: 18px;
+  border-radius: var(--รัศมี);
+  box-shadow: var(--เงา);
+  padding: 20px;
   margin-bottom: 18px;
 }
 
 /* ── ตาราง ── */
-table { width: 100%; border-collapse: collapse; background: #fff; }
-th, td { padding: 10px 12px; border-bottom: 1px solid var(--สีขอบ); text-align: left; }
-th { background: #eef2f5; font-weight: 700; }
-tbody tr.clickable:hover { background: #eaf3fa; cursor: pointer; }
+table { width: 100%; border-collapse: collapse; background: var(--สีพื้นผิว); }
+th, td { padding: 12px 14px; border-bottom: 1px solid var(--สีขอบ); text-align: left; }
+th { background: #f3f7fa; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--สีจาง); }
+tbody tr.clickable { transition: var(--เปลี่ยนผ่าน); }
+tbody tr.clickable:hover { background: var(--สีหลักอ่อน); cursor: pointer; }
 
 /* ── ป้ายสถานะ ── */
 .badge {
   display: inline-block;
-  padding: 3px 12px;
+  padding: 4px 13px;
   border-radius: 999px;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
 }
 .badge-รอพิจารณา { background: #fff3cd; color: #7a5b00; border: 1px solid #ffe08a; }
@@ -74,43 +106,53 @@ tbody tr.clickable:hover { background: #eaf3fa; cursor: pointer; }
 /* ── ปุ่ม ── */
 button, .btn {
   font-family: inherit;
-  font-size: 17px;
-  padding: 9px 18px;
-  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 20px;
+  min-height: 44px; /* พื้นที่กดขั้นต่ำสำหรับนิ้ว/เมาส์ ตามหลัก accessibility */
+  border-radius: var(--รัศมีเล็ก);
   border: 1px solid var(--สีหลัก);
   background: var(--สีหลัก);
   color: #fff;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--เปลี่ยนผ่าน);
 }
-button:hover, .btn:hover { background: var(--สีหลักเข้ม); }
-button:disabled { opacity: .55; cursor: not-allowed; }
+button:hover, .btn:hover { background: var(--สีหลักเข้ม); border-color: var(--สีหลักเข้ม); box-shadow: var(--เงาโฮเวอร์); }
+button:active, .btn:active { box-shadow: none; transform: translateY(1px); }
+button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
 .btn-ghost { background: #fff; color: var(--สีหลัก); }
-.btn-ghost:hover { background: #e8f1f8; }
+.btn-ghost:hover { background: var(--สีหลักอ่อน); }
 .btn-danger { background: #b3261e; border-color: #b3261e; }
-.btn-danger:hover { background: #8c1c16; }
+.btn-danger:hover { background: #8c1c16; border-color: #8c1c16; }
 .btn-ok { background: #1b7f45; border-color: #1b7f45; }
-.btn-ok:hover { background: #146134; }
-.btn-small { font-size: 14px; padding: 5px 12px; }
+.btn-ok:hover { background: #146134; border-color: #146134; }
+.btn-small { font-size: 14px; padding: 6px 14px; min-height: 36px; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 
 /* ── ฟอร์ม ── */
-label { display: block; font-weight: 700; margin: 14px 0 4px; }
+label { display: block; font-weight: 700; margin: 16px 0 6px; font-size: 15px; }
 input, select, textarea {
   font-family: inherit;
-  font-size: 17px;
+  font-size: 16px;
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--สีขอบ);
-  border-radius: 8px;
-  background: #fff;
+  border-radius: var(--รัศมีเล็ก);
+  background: var(--สีพื้นผิว);
+  transition: var(--เปลี่ยนผ่าน);
 }
+input:hover, select:hover, textarea:hover { border-color: #b9c4cf; }
+input:focus, select:focus, textarea:focus { border-color: var(--สีหลัก); }
 textarea { min-height: 110px; resize: vertical; }
-.hint { color: var(--สีจาง); font-size: 15px; margin-top: 4px; }
+.hint { color: var(--สีจาง); font-size: 14px; margin-top: 6px; }
 
 /* ── กล่องข้อความแจ้งเตือน ── */
-.alert { padding: 12px 14px; border-radius: 8px; margin: 12px 0; }
+.alert { padding: 13px 15px; border-radius: var(--รัศมีเล็ก); margin: 12px 0; font-size: 15px; }
 .alert-warn  { background: #fff8e1; border: 1px solid #ffd54f; color: #6d4c00; }
 .alert-error { background: #fdecea; border: 1px solid #f5b3ad; color: #8b1f1a; }
 .alert-ok    { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e34; }
@@ -118,33 +160,36 @@ textarea { min-height: 110px; resize: vertical; }
 .hidden { display: none; }
 
 /* ── รายการความเห็น ── */
-.comment { border-left: 4px solid var(--สีขอบ); padding: 6px 0 6px 12px; margin-bottom: 12px; }
-.comment .meta { color: var(--สีจาง); font-size: 15px; }
+.comment { border-left: 4px solid var(--สีขอบ); padding: 8px 0 8px 14px; margin-bottom: 12px; }
+.comment .meta { color: var(--สีจาง); font-size: 14px; margin-bottom: 2px; }
 
 /* ── กล่องแสดงตัวเลขสรุป ── */
 .stat-row { display: flex; flex-wrap: wrap; gap: 14px; }
 .stat {
   flex: 1 1 200px;
-  background: #fff;
+  background: var(--สีพื้นผิว);
   border: 1px solid var(--สีขอบ);
-  border-radius: 10px;
-  padding: 18px;
+  border-radius: var(--รัศมี);
+  box-shadow: var(--เงา);
+  padding: 20px;
   text-align: center;
   text-decoration: none;
   color: inherit;
+  transition: var(--เปลี่ยนผ่าน);
 }
-.stat:hover { background: #eaf3fa; }
-.stat .number { font-size: 44px; font-weight: 700; line-height: 1.2; }
+.stat:hover { background: var(--สีหลักอ่อน); box-shadow: var(--เงาโฮเวอร์); }
+.stat .number { font-size: 42px; font-weight: 700; line-height: 1.2; color: var(--สีหลักเข้ม); }
 
 /* ── รายการข้อมูลในหน้ารายละเอียด ── */
-.field-row { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 7px 0; border-bottom: 1px dashed var(--สีขอบ); }
-.field-row .k { min-width: 150px; font-weight: 700; }
+.field-row { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 9px 0; border-bottom: 1px dashed var(--สีขอบ); }
+.field-row .k { min-width: 150px; font-weight: 700; color: var(--สีจาง); }
 
 /* ── มือถือ ── */
 @media (max-width: 640px) {
-  body { font-size: 16px; }
-  .container { padding: 14px 12px 50px; }
-  th, td { padding: 8px 7px; font-size: 15px; }
+  body { font-size: 15px; }
+  .container { padding: 16px 12px 50px; }
+  th, td { padding: 9px 8px; font-size: 14px; }
   .hide-mobile { display: none; }
   .navbar .nav-user { margin-left: 0; width: 100%; }
+  .stat .number { font-size: 34px; }
 }

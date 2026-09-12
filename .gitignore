@@ -11,6 +11,12 @@
 node_modules/
 .firebase/
 
+# ── ผลลัพธ์จากการรันเทสต์ Playwright (สร้างใหม่ได้ทุกครั้งที่รัน) ──
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
 
 # ── ไฟล์ที่เครื่องเราสร้างเอง ──
 .DS_Store

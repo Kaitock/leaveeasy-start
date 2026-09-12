@@ -18,7 +18,9 @@ import {
   updateDoc,
   collection,
   getDocs,
+  addDoc,
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { เรียกAI } from "./ai.js";
 
 var รหัสใบลา = ค่าจากURL("id");
 var กล่องใบลา = document.getElementById("กล่องใบลา");
@@ -27,6 +29,7 @@ var กล่องความเห็น = document.getElementById("กล่
 var ใบ = null;        // ใบลาที่กำลังเปิดดู
 var ความเห็น = [];    // ความเห็นของใบนี้
 var กำลังบันทึก = false;
+var กำลังสรุปAI = false;
 
 เริ่มทำงาน();
 
@@ -92,6 +95,18 @@ function วาดใบลา() {
     return '<div class="field-row"><span class="k">' + r[0] + "</span><span>" + r[1] + "</span></div>";
   }).join("");
 
+  // 🤖 ปุ่ม "ให้ AI ช่วยสรุปใบลา" — วางไว้ก่อนปุ่มอนุมัติ/ไม่อนุมัติเสมอ
+  //    ให้หัวหน้าอ่านสรุปก่อนตัดสินใจ (ตรงตามสเปคสัปดาห์ที่ 8)
+  //    ถ้ามี aiSuggestion อยู่แล้ว (เคยกดไว้ก่อนหน้า) ให้โชว์ทันทีโดยไม่ต้องกดซ้ำ
+  html +=
+    '<div class="btn-row">' +
+    '<button type="button" class="btn-ghost btn-small" id="ปุ่มAIสรุป">🤖 ให้ AI ช่วยสรุปใบลา</button>' +
+    "</div>" +
+    '<div id="กล่องสรุปAI" class="alert alert-ai' + (ใบ.aiSuggestion ? "" : " hidden") + '">' +
+    "🤖 สรุปจาก AI — โปรดตรวจสอบก่อนตัดสินใจ: " + esc(ใบ.aiSuggestion || "") +
+    "</div>" +
+    '<p class="hidden" id="เตือนAIสรุป"></p>';
+
   // ปุ่มอนุมัติ / ไม่อนุมัติ ขึ้นเฉพาะใบที่ยังรอพิจารณา
   if (ใบ.status === "รอพิจารณา") {
     html +=
@@ -106,10 +121,89 @@ function วาดใบลา() {
 
   กล่องใบลา.innerHTML = html;
 
+  document.getElementById("ปุ่มAIสรุป").addEventListener("click", สรุปด้วยAI);
+
   if (ใบ.status === "รอพิจารณา") {
     document.getElementById("ปุ่มอนุมัติ").addEventListener("click", function () { เปลี่ยนสถานะ("อนุมัติ"); });
     document.getElementById("ปุ่มไม่อนุมัติ").addEventListener("click", function () { เปลี่ยนสถานะ("ไม่อนุมัติ"); });
   }
+}
+
+// ── ให้ AI ช่วยสรุปใบลา แล้วเขียนกลับลงฐานข้อมูล (US: ปุ่มผู้ช่วย AI สัปดาห์ที่ 8) ──
+// ขั้น 1: อ่านใบลาใบนี้ (ใช้ ใบ ที่โหลดไว้แล้วในหน่วยความจำ)
+// ขั้น 2: ให้ AI เขียนสรุปสั้น ๆ
+// ขั้น 3: เขียนสรุปกลับลง Firestore ด้วย updateDoc (แตะเฉพาะช่อง aiSuggestion ช่องอื่นไม่กระทบ)
+//         พร้อมบันทึกประวัติการเรียกครั้งนี้ (input/output/createdAt) ไว้ที่
+//         โฟลเดอร์ย่อย leaveRequests/{id}/aiLog เก็บไว้ตรวจสอบย้อนหลังได้ทุกครั้ง
+// 📌 ฟังก์ชันนี้ไม่แตะช่อง status เด็ดขาด — สถานะจริง (รอพิจารณา/อนุมัติ/ไม่อนุมัติ)
+//    เปลี่ยนได้ทางเดียวคือคนกดปุ่มอนุมัติ/ไม่อนุมัติเอง (ดู เปลี่ยนสถานะ() ด้านล่าง)
+async function สรุปด้วยAI() {
+  if (กำลังสรุปAI) return;
+
+  กำลังสรุปAI = true;
+  ปิดปุ่มAIสรุป(true);
+  เตือนAIสรุป("");
+
+  try {
+    var promptสรุป =
+      "คุณคือผู้ช่วยสรุปใบลาให้หัวหน้าอ่านก่อนตัดสินใจอนุมัติ " +
+      "สรุปใบลาต่อไปนี้ให้กระชับ 1-2 ประโยคภาษาไทย เขียนเฉพาะข้อเท็จจริง " +
+      "ห้ามใส่ความเห็นส่วนตัวหรือคำแนะนำว่าควรอนุมัติหรือไม่:\n\n" +
+      "หัวข้อ: " + ใบ.title + "\n" +
+      "ประเภทการลา: " + ใบ.leaveTypeName + "\n" +
+      "ช่วงวันที่ลา: " + ใบ.startDate + " ถึง " + ใบ.endDate + "\n" +
+      "ผู้ขอลา: " + ใบ.requesterName + "\n" +
+      "เหตุผลที่พิมพ์ไว้: \"" + ใบ.reason + "\"";
+
+    var สรุป = (await เรียกAI(promptสรุป)).trim();
+    if (!สรุป) throw new Error("AI ไม่ได้ส่งข้อความสรุปกลับมา");
+
+    // ⚠️ updateDoc แก้เฉพาะช่อง aiSuggestion ช่องอื่นในไฟล์ไม่ถูกแตะเลย
+    await updateDoc(doc(db, "leaveRequests", ใบ.id), { aiSuggestion: สรุป });
+    ใบ.aiSuggestion = สรุป;
+
+    // 📌 บันทึกประวัติการเรียก AI ทุกครั้งไว้ที่โฟลเดอร์ย่อย leaveRequests/{id}/aiLog
+    //    ใช้ addDoc ให้ Firestore ตั้งชื่อไฟล์ให้เอง เพราะต้องเพิ่มรายการใหม่ทุกครั้งที่เรียก
+    //    ไม่ใช่เขียนทับของเดิม (ต่างจาก aiSuggestion ที่มีค่าเดียว เก็บแค่ล่าสุด)
+    //    ถ้าบันทึก log ไม่สำเร็จ ไม่ถือว่าฟีเจอร์หลักล้มเหลว (สรุปได้แล้ว/บันทึกแล้วจริง)
+    //    แค่เตือนไว้ใน console เฉย ๆ
+    try {
+      await addDoc(collection(db, "leaveRequests", ใบ.id, "aiLog"), {
+        input: promptสรุป,
+        output: สรุป,
+        createdAt: เวลาตอนนี้()
+      });
+    } catch (ข้อผิดพลาดบันทึกล็อก) {
+      console.warn("บันทึก aiLog ไม่สำเร็จ (ไม่กระทบสรุปที่บันทึกไปแล้ว):", ข้อผิดพลาดบันทึกล็อก);
+    }
+  } catch (ข้อผิดพลาด) {
+    กำลังสรุปAI = false;
+    ปิดปุ่มAIสรุป(false);
+    เตือนAIสรุป("สรุปด้วย AI ไม่สำเร็จ — " + ข้อผิดพลาด.message);
+    return;
+  }
+
+  // สำเร็จแล้วค่อยวาดใหม่ทั้งกล่อง (เหมือน เปลี่ยนสถานะ() ทำหลังบันทึกสำเร็จ)
+  กำลังสรุปAI = false;
+  วาดใบลา();
+}
+
+function ปิดปุ่มAIสรุป(ปิด) {
+  var ปุ่ม = document.getElementById("ปุ่มAIสรุป");
+  if (!ปุ่ม) return;
+  ปุ่ม.disabled = ปิด;
+  ปุ่ม.textContent = ปิด ? "🤖 กำลังให้ AI สรุป …" : "🤖 ให้ AI ช่วยสรุปใบลา";
+}
+
+function เตือนAIสรุป(ข้อความ) {
+  var กล่อง = document.getElementById("เตือนAIสรุป");
+  if (!กล่อง) return;
+  if (!ข้อความ) {
+    กล่อง.classList.add("hidden");
+    return;
+  }
+  กล่อง.textContent = "⚠️ " + ข้อความ;
+  กล่อง.classList.remove("hidden");
 }
 
 // ── เปลี่ยนสถานะ แล้วบันทึกลง Firestore ──
